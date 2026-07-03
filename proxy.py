@@ -10,8 +10,15 @@ async def proxy_download(url: str, filename: str = None) -> StreamingResponse:
     client = httpx.AsyncClient(follow_redirects=True)
     
     try:
-        # Build stream request
-        req = client.build_request("GET", url)
+        # Build stream request with standard browser headers to bypass CDN blocking
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "*/*",
+            "Accept-Encoding": "identity",
+            "Connection": "keep-alive",
+            "Referer": "https://www.youtube.com/"
+        }
+        req = client.build_request("GET", url, headers=headers)
         response = await client.send(req, stream=True)
     except Exception as e:
         await client.aclose()

@@ -9,6 +9,11 @@ def parse_media_info(url: str) -> Dict[str, Any]:
         'skip_download': True,
         'quiet': True,
         'no_warnings': True,
+        'extractor_args': {
+            'youtube': {
+                'clients': ['android', 'ios']
+            }
+        }
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
