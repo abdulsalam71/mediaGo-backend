@@ -1,4 +1,5 @@
 import yt_dlp
+import os
 from typing import Dict, Any, List
 
 def parse_media_info(url: str) -> Dict[str, Any]:
@@ -15,6 +16,10 @@ def parse_media_info(url: str) -> Dict[str, Any]:
             }
         }
     }
+    
+    # Use cookies if provided to bypass YouTube bot verification blocks
+    if os.path.exists('cookies.txt'):
+        ydl_opts['cookiefile'] = 'cookies.txt'
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
