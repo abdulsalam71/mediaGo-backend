@@ -1,6 +1,23 @@
 import httpx
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
+from urllib.parse import urlparse
+
+def get_referer_for_url(url: str) -> str:
+    try:
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+        if "youtube" in domain or "googlevideo" in domain:
+            return "https://www.youtube.com/"
+        elif "tiktok" in domain:
+            return "https://www.tiktok.com/"
+        elif "instagram" in domain:
+            return "https://www.instagram.com/"
+        elif "twitter" in domain or "x.com" in domain:
+            return "https://x.com/"
+        return f"{parsed.scheme}://{parsed.netloc}/"
+    except Exception:
+        return "https://www.youtube.com/"
 
 async def proxy_download(url: str, filename: str = None) -> StreamingResponse:
     """
@@ -10,13 +27,14 @@ async def proxy_download(url: str, filename: str = None) -> StreamingResponse:
     client = httpx.AsyncClient(follow_redirects=True)
     
     try:
+        referer = get_referer_for_url(url)
         # Build stream request with standard browser headers to bypass CDN blocking
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "*/*",
             "Accept-Encoding": "identity",
             "Connection": "keep-alive",
-            "Referer": "https://www.youtube.com/"
+            "Referer": referer
         }
         req = client.build_request("GET", url, headers=headers)
         response = await client.send(req, stream=True)
